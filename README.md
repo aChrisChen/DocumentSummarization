@@ -1,5 +1,7 @@
 # DocumentSummarization
+
 ** Copying my code for your assignment is an academic offence. You have been warned.**
+
 A Class of Submodular Functions for Document Summarization
 
 A Class of Submodular Functions for Document Summarization.pdf ---- The article we are interested in.
