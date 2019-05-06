@@ -14,18 +14,22 @@ import os
 
 class SubmodModel:
 
-    def __init__(self, topics_file_name):
+    def __init__(self, topics_file_name, other_file = False):
         self.X_train_counts, self.X_train_tf, self.tokenizer, self.bigram_vectorizer \
-            = self.get_V(topics_file_name)
+            = self.get_V(topics_file_name, other_file)
         self.V = range(self.X_train_counts.shape[0])
         self.alpha = 6 / len(list(self.V))
         self.cluster = self.get_cluster(int(0.2 * len(self.V)))
-        self.gold_summ_count = self.get_gold_summ_count(topics_file_name)
+        if other_file == False:
+            self.gold_summ_count = self.get_gold_summ_count(topics_file_name)
         self.cosine_similarity_kernel = cosine_similarity(self.X_train_tf, self.X_train_tf)
 
     # initialization helper
-    def get_V(self, topics_file_name):
-        path = 'OpinosisDataset1.0_0/topics/{}'.format(topics_file_name)
+    def get_V(self, topics_file_name, other_file):
+        if other_file == True:
+            path = topics_file_name
+        else:
+            path = 'OpinosisDataset1.0_0/topics/{}'.format(topics_file_name)
         text = open(path, encoding="utf8", errors='ignore')
         text = text.read()
 
@@ -274,13 +278,18 @@ class SubmodModel:
         S_sub = self.greedy_submodular(self.get_f_sub, self.get_cost, budget, r)
         t_sub = time.time() - t_start
 
+        t_start = time.time()
+        S_sub_lazy = self.greedy_submodular(self.get_f_sub, self.get_cost, budget, r, lazy = True)
+        t_sub_lazy = time.time() - t_start
+
         rouge_MMR = self.rouge_n(S_MMR)
         rouge_MMR_lazy = self.rouge_n(S_MMR_lazy)
         rouge_MMR_double = self.rouge_n(S_MMR_double)
         rouge_sub = self.rouge_n(S_sub)
+        rouge_sub_lazy = self.rouge_n(S_sub_lazy)
 
-        return rouge_MMR, rouge_MMR_lazy, rouge_MMR_double, S_MMR_double_cost, rouge_sub, \
-        		t_MMR, t_MMR_lazy, t_MMR_double, t_sub, self.X_train_tf.shape[0]
+        return rouge_MMR, rouge_MMR_lazy, rouge_MMR_double, S_MMR_double_cost, rouge_sub, rouge_sub_lazy, \
+        		t_MMR, t_MMR_lazy, t_MMR_double, t_sub, t_sub_lazy, self.X_train_tf.shape[0]
 
 
 
